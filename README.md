@@ -1,5 +1,5 @@
-# AdventOfCode :christmas_tree: 2023
-Rust :crab:
+# Advent Of Code :christmas_tree: 2023
+This year in Rust :crab:
 
 ## Usage
 ```sh
