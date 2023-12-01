@@ -1,17 +1,15 @@
-use itertools::Itertools;
 
 #[aoc::main(1)]
 fn main(input: &str) -> (usize, usize) {
     let vals = input
-        .trim()
-        .split("\n\n")
-        .map(|elf| {
-            elf.lines().map(|val| {
-                val.parse().unwrap_or(0)
-            }).sum()
+        .lines()
+        .map(|line| {
+            let t = line.chars()
+                .filter(|d| *d >= '0' && *d <= '9')
+                .collect::<String>();
+            format!("{}{}", t.chars().next().unwrap(), t.chars().last().unwrap())
         })
-        .sorted()
-        .rev()
-        .collect::<Vec<_>>();
-    (vals[0], vals[0] + vals[1] + vals[2])
+        .collect::<Vec<String>>();
+
+    (vals.iter().map(|s| s.parse::<u32>().unwrap()).sum::<u32>() as usize, 0)
 }
