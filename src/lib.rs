@@ -19,15 +19,22 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     const INPUT: &str = include_str!(#input_path);
     #aoc_solution
     fn main() {
-      let now = ::std::time::Instant::now();
-      let (p1, p2) = aoc_solution(INPUT.trim_end());
-      let elapsed = now.elapsed();
-      println!("Part one: {}", p1);
-      println!("Part two: {}", p2);
+      let mut tot = 0.0;
+      let mut out : (usize, usize) = (0, 0);
+      let num_tries = 1000;
+      for _ in 0..num_tries {
+        let now = ::std::time::Instant::now();
+        out = aoc_solution(INPUT.trim_end());
+        let elapsed = now.elapsed();
+        tot += elapsed.as_micros() as f32; 
+      }
+      tot = tot / num_tries as f32;
+      println!("Part one: {}", out.0);
+      println!("Part two: {}", out.1);
       //if elapsed.as_millis() > 0 {
       //  println!("Time: {}ms", elapsed.as_millis());
       //} else {
-        println!("Time: {}μs", elapsed.as_micros());
+        println!("Time: {}μs", tot as usize);
       //}
     }
   };

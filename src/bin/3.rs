@@ -42,35 +42,34 @@ fn main(input: &str) -> (usize, usize) {
                 } else {
                     end_num = char_index as i32;
                 }
-
-                for x in -1..=1 {
-                    for y in -1..=1 {
-                        if (x == 0) && (y == 0) {
-                            continue;
-                        }
-
-                        let grid_indices = (char_index as i32 + x, line_index as i32 + y);
-                        if grid_indices.0 < 0 || (grid_indices.0 > (stride - 1)) {
-                            continue;
-                        }
-                        if grid_indices.1 < 0 || (grid_indices.1 > (num_lines - 1)) {
-                            continue;
-                        }
-                        let ch = &lines[grid_indices.1 as usize][grid_indices.0 as usize];
-                        if !is_digit(ch) && !is_empty(ch) {
-                            matched = true;
-
-                            // For each gear pivot, on this number, store its location
-                            if *ch == b'*' {
-                                let key = ((stride as i32) * grid_indices.1) + grid_indices.0;
-                                gear_pivots.insert(key);
-                            }
-                        }
-                    }
-                }
             }
             if !is_digit(ch) || (char_index == (stride - 1) as usize) {
                 if start_num != -1 {
+                    for x in start_num-1..=end_num+1 {
+                        for y in line_index-1..=line_index+1 {
+                            if (x >= start_num && x <= end_num) && (y == line_index) {
+                                continue;
+                            }
+
+                            if x < 0 || (x > (stride - 1)) {
+                                continue;
+                            }
+                            if y < 0 || (y > (num_lines - 1)) {
+                                continue;
+                            }
+                            let ch = &lines[y as usize][x as usize];
+                            if !is_digit(ch) && !is_empty(ch) {
+                                matched = true;
+
+                                // For each gear pivot, on this number, store its location
+                                if *ch == b'*' {
+                                    let key = ((stride as i32) * y) + x;
+                                    gear_pivots.insert(key);
+                                }
+                            }
+                        }
+                    }
+
                     let num = extract_num(&line, start_num, end_num);
                     if matched {
                         total_engine += num;
