@@ -20,7 +20,6 @@ fn extract_num(line: &[u8], begin: i32, end: i32) -> u32 {
 
 #[aoc::main(3)]
 fn main(input: &str) -> (usize, usize) {
-
     let lines = input.lines().map(str::as_bytes).collect::<Vec<_>>();
 
     let stride = lines[0].len() as i32;
@@ -49,6 +48,7 @@ fn main(input: &str) -> (usize, usize) {
                         if (x == 0) && (y == 0) {
                             continue;
                         }
+
                         let grid_indices = (char_index as i32 + x, line_index as i32 + y);
                         if grid_indices.0 < 0 || (grid_indices.0 > (stride - 1)) {
                             continue;
@@ -89,7 +89,11 @@ fn main(input: &str) -> (usize, usize) {
         }
     }
 
-    let total_gears: u32 = gears.iter().filter(|(_, v)| v.len() == 2).map(|(_, v)| v[0] * v[1]).sum();
+    let total_gears: u32 = gears
+        .iter()
+        .filter(|(_, v)| v.len() == 2)
+        .map(|(_, v)| v[0] * v[1])
+        .sum();
 
     (total_engine as usize, total_gears as usize)
 }
