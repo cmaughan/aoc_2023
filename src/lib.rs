@@ -24,11 +24,11 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
       let elapsed = now.elapsed();
       println!("Part one: {}", p1);
       println!("Part two: {}", p2);
-      if elapsed.as_millis() > 0 {
-        println!("Time: {}ms", elapsed.as_millis());
-      } else {
+      //if elapsed.as_millis() > 0 {
+      //  println!("Time: {}ms", elapsed.as_millis());
+      //} else {
         println!("Time: {}μs", elapsed.as_micros());
-      }
+      //}
     }
   };
   TokenStream::from(tokens)

@@ -1,19 +1,19 @@
 
 #[aoc::main(1)]
 fn main(input: &str) -> (usize, usize) {
-    let mut vals = input
+    let p1 = input
         .lines()
         .map(|line| {
-            let t = line.chars()
+            let t = line
+                .chars()
                 .filter(|d| *d >= '0' && *d <= '9')
-                .collect::<String>();
-            format!("{}{}", t.chars().next().unwrap(), t.chars().last().unwrap())
+                .map(|d| (d as u32) - '0' as u32)
+                .collect::<Vec<_>>();
+            t.first().unwrap() * 10 + t.last().unwrap()
         })
-        .collect::<Vec<String>>();
+        .sum::<u32>();
 
-    let p1 = vals.iter().map(|s| s.parse::<u32>().unwrap()).sum::<u32>() as usize;
-
-    vals = input
+    let p2 = input
         .lines()
         .map(|line| {
             let mut new_line = line.replace("one", "o1e");
@@ -25,14 +25,14 @@ fn main(input: &str) -> (usize, usize) {
             new_line = new_line.replace("seven", "s7n");
             new_line = new_line.replace("eight", "e8t");
             new_line = new_line.replace("nine", "n9e");
-            let t = new_line.chars()
+            let t = new_line
+                .chars()
                 .filter(|d| *d >= '0' && *d <= '9')
-                .collect::<String>();
-            format!("{}{}", t.chars().next().unwrap(), t.chars().last().unwrap())
+                .map(|d| (d as u32) - '0' as u32)
+                .collect::<Vec<_>>();
+            t.first().unwrap() * 10 + t.last().unwrap()
         })
-        .collect::<Vec<String>>();
-
-    let p2 = vals.iter().map(|s| s.parse::<u32>().unwrap()).sum::<u32>() as usize;
+        .sum::<u32>();
 
     (p1 as usize, p2 as usize)
 }
