@@ -21,7 +21,7 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     fn main() {
       let mut tot = 0.0;
       let mut out : (usize, usize) = (0, 0);
-      let num_tries = 1;
+      let num_tries = 100;
       for _ in 0..num_tries {
         let now = ::std::time::Instant::now();
         out = aoc_solution(INPUT.trim_end());
