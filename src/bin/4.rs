@@ -2,33 +2,31 @@
 fn main(input: &str) -> (usize, usize) {
     let mut tot_all = 0;
     let mut mult = vec![1 as usize; input.lines().count()];
-    let mut nums = vec![0; 100];
+    let mut nums = vec![-1; 100];
     for (index, line) in input.lines().enumerate() {
-
-        nums.iter_mut().for_each(|a| *a = 0);
 
         let card_matches = line.split("|").collect::<Vec<_>>();
 
         let card = card_matches[0].trim().split(":").nth(1).unwrap();
 
-        card_matches[1]
+        card
             .trim()
-            .split(|c| c == ' ' || c == ':')
+            .split(|c| c == ' ')
             .filter_map(|c| c.parse::<u32>().ok())
-            .for_each(|m| nums[m as usize] = 1 );
+            .for_each(|m| nums[m as usize] = index as i32);
 
-        let tot = card
+        let tot = card_matches[1]
             .trim()
-            .split(|c| c == ' ' || c == ':')
+            .split(|c| c == ' ')
             .filter_map(|c| c.parse::<u32>().ok())
-            .filter(|v| nums[*v as usize] != 0)
+            .filter(|v| nums[*v as usize] == index as i32)
             .count();
 
         if tot > 0 {
             tot_all += 1 << (tot - 1);
 
             let current = mult[index];
-            for slot in (index + 1)..(index + 1 + tot) {
+            for slot in (index + 1)..=(index + tot) {
                 mult[slot] += current;
             }
         }
