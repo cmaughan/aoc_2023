@@ -1,13 +1,15 @@
+
 fn run_trial(nums: Vec<u64>) -> u64 {
-    println!("Nums: {:?}", nums);
     let num_trials = nums.len() / 2;
     let mut tot = 1;
     for boat in 0..num_trials {
         let win_distance = nums[boat + num_trials];
+        let total_time = nums[boat];
+        
         let mut ways: u64 = 0;
-        for time in 0..nums[boat] {
+        for time in 0..total_time {
             let speed = time;
-            let travel_time = nums[boat] - time;
+            let travel_time = total_time - time;
             let distance = travel_time * speed;
             if distance > win_distance {
                 ways += 1;
