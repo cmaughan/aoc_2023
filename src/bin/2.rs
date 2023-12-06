@@ -1,7 +1,7 @@
 use std::cmp;
 
 #[aoc::main(2)]
-fn main(input: &str) -> (usize, usize) {
+fn main(part: i32, input: &str) -> usize {
     let games = input
         .lines()
         .map(|l| l.split(":").nth(1).unwrap())
@@ -49,5 +49,9 @@ fn main(input: &str) -> (usize, usize) {
     }
 
     // 2563, 70768
-    (possibles as usize, mins as usize)
+    if part == 0 {
+        possibles as usize
+    } else {
+        mins as usize
+    }
 }

@@ -1,44 +1,10 @@
 use itertools::Itertools;
 use std::{
-    cmp::{self, max, min},
-    collections::HashSet,
+    cmp::{max, min},
+    collections::VecDeque,
 };
 
-const TEST: &str = "seeds: 79 14 55 13
-
-seed-to-soil map:
-50 98 2
-52 50 48
-
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
-
-water-to-light map:
-88 18 7
-18 25 70
-
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4";
-
-fn resolve_seed(mut seed: i64, categories: &Vec<Vec<i64>>) -> i64 {
+fn resolve_seed(mut seed: u64, categories: &Vec<Vec<u64>>) -> u64 {
     for map in categories.iter().skip(1) {
         for (&dest, &source, &length) in map.iter().tuples() {
             if (seed >= source) && (seed < (source + length)) {
@@ -51,92 +17,69 @@ fn resolve_seed(mut seed: i64, categories: &Vec<Vec<i64>>) -> i64 {
 }
 
 #[aoc::main(5)]
-fn main(input: &str) -> (usize, usize) {
-    let categories = TEST
+fn main(part: i32, _input: &str) -> usize {
+
+    // Get the mapped ranges
+    let categories = _input
         .split("\n\n")
         .map(|s| {
             s.split(":")
                 .nth(1)
                 .unwrap()
                 .split_whitespace()
-                .filter_map(|v| v.parse::<i64>().ok())
+                .filter_map(|v| v.parse::<u64>().ok())
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
 
-    let p1 = categories[0].iter().fold(i64::MAX, |lowest, &seed| {
-        min(lowest, resolve_seed(seed, &categories))
-    });
+    if part == 0 {
+        // Part 0, just a mapped search
+        categories[0].iter().fold(u64::MAX, |lowest, &seed| {
+            min(lowest, resolve_seed(seed, &categories))
+        }) as usize
+    } else {
+        // Part 1 keep the seeds in a deque so I can add more as I go
+        let mut seeds: VecDeque<(u64, u64)> = categories[0]
+            .iter()
+            .tuples()
+            .map(|(&s, &d)| (s, s+d))
+            .collect();
 
-    #[derive(Eq, PartialEq, Hash, Copy, Clone)]
-    struct Span {
-        begin: i64,
-        end: i64,
-    }
-    let seed_spans: Vec<Span> = categories[0]
-        .iter()
-        .tuples()
-        .map(|(&s, &d)| Span {
-            begin: s,
-            end: s + d,
-        })
-        .collect();
+        for cat in categories.iter().skip(1) {
+        
+            let mut new_seeds: VecDeque<(u64, u64)> = VecDeque::new();
 
-    let mut new_spans: HashSet<Span> = HashSet::new();
+            while let Some(seed) = seeds.pop_front() {
 
-    let mut p2 = i64::MAX;
-    //for s in &seed_spans {
-    new_spans.clear();
-    new_spans.insert(Span{begin: 79, end: 80});
+                let mut overlapped = false;
+                for (&dest, &source, &length) in cat.iter().tuples() {
+                    let overlap_begin = max(seed.0, source);
+                    let overlap_end = min(seed.1, source + length);
 
-    for cat in categories.iter().skip(1) {
-        //println!("Category");
-        for s in new_spans.clone().iter() {
-            //println!("Seed: {},{}", s.begin, s.end);
-            for (&dest, &source, &length) in cat.iter().tuples() {
-                let diff = dest - source;
+                    if overlap_begin < overlap_end {
+                        new_seeds.push_back((overlap_begin + (dest - source), overlap_end + (dest - source)));
 
-                let overlap = Span {
-                    begin: max(source, s.begin),
-                    end: min(s.end, source + length),
-                };
-
-                if overlap.begin < overlap.end {
-                    if s.begin < overlap.begin {
-                        new_spans.insert(Span {
-                            begin: s.begin,
-                            end: overlap.begin,
-                        });
-                        //println!("new span: {},{}", s.begin, overlap.begin);
-                    } else if s.end > overlap.end {
-                        new_spans.insert(Span {
-                            begin: overlap.end,
-                            end: s.end,
-                        });
-                        //println!("new span: {},{}", overlap.end, s.end);
+                        if seed.0 < overlap_begin {
+                            seeds.push_back((seed.0, overlap_begin));
+                        } else if seed.1 > overlap_end {
+                            seeds.push_back((overlap_end, seed.1 ));
+                        }
+                        overlapped = true;
+                        break;
                     }
+                }
 
-                    new_spans.insert(Span {
-                        begin: overlap.begin + diff,
-                        end: overlap.end + diff,
-                    });
-                    //println!("new span (overlap): {},{}", overlap.begin + diff, overlap.end + diff);
-
-                    break;
+                if !overlapped {
+                    new_seeds.push_back(seed);
                 }
             }
+
+            seeds = new_seeds;
         }
 
-        let mut low = i64::MAX;
-        for s in new_spans.iter() {
-            low = min(low, s.begin);
-        }
-        //println!("Min: {}", low);
-        p2 = min(p2, low);
+        seeds.iter().min_by_key(|val| val.0).unwrap().0 as usize
     }
 
-    //}
-
+    // 35, 46
     // 51580674, 99751240
-    (p1 as usize, p2 as usize)
 }

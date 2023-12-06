@@ -1,5 +1,6 @@
 #[aoc::main(4)]
-fn main(input: &str) -> (usize, usize) {
+fn main(part: i32, input: &str) -> usize {
+
     let mut tot_all = 0;
     let mut mult = vec![1 as usize; input.lines().count()];
     let mut nums = vec![-1; 100];
@@ -32,5 +33,10 @@ fn main(input: &str) -> (usize, usize) {
         }
     }
 
-    (tot_all as usize, mult.iter().sum())
+    if part == 0 {
+        tot_all as usize
+    }
+    else {
+        mult.iter().sum()
+    }
 }

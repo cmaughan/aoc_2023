@@ -41,9 +41,11 @@ fn find_begin_end_digit_or_word(line: &str) -> u32 {
 }
 
 #[aoc::main(1)]
-fn main(input: &str) -> (usize, usize) {
-    let p1 = input.lines().map(find_begin_end_digit).sum::<u32>();
-    let p2 = input.lines().map(find_begin_end_digit_or_word).sum::<u32>();
-    
-    (p1 as usize, p2 as usize)
+fn main(part: i32, input: &str) -> usize {
+    if part == 0 {
+        input.lines().map(find_begin_end_digit).sum::<u32>() as usize
+    }
+    else {
+        input.lines().map(find_begin_end_digit_or_word).sum::<u32>() as usize
+    }
 }

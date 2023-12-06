@@ -28,33 +28,42 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         #aoc_solution
 
         fn main() {
-        let args = Cli::parse();
-        let mut tot = 0.0;
-        let mut out : (usize, usize) = (0, 0);
-        let mut num_tries = 1;
-        if args.perf == true {
-            num_tries = 1000
+            let args = Cli::parse();
+            let mut tot : f64 = 0.0;
+            let mut out : usize = 0;
+            let mut num_tries = 1;
+            if args.perf == true {
+                num_tries = 1000
+            }
+            for part in 0..=1 {
+                for _ in 0..num_tries {
+                    let now = ::std::time::Instant::now();
+                    out = aoc_solution(part, INPUT.trim_end());
+                    let elapsed = now.elapsed();
+                    tot += elapsed.as_nanos() as f64;
+                }
+                tot = tot / num_tries as f64;
+                if !args.perf {
+                    println!("\nPart {}: {}", part + 1, out);
+                    if tot < 1000.0 {
+                        println!("Time: {}ns", tot as usize);
+                    }
+                    else {
+                        println!("Time: {}μs", (tot / 1000.0) as usize);
+                    }
+                }
+                else {
+                    if part > 0 {
+                        print!(",");
+                    }
+                    print!("{}", tot as usize);
+                }
+            }
+            //if elapsed.as_millis() > 0 {
+            //  println!("Time: {}ms", elapsed.as_millis());
+            //} else {
+            //}
         }
-        for _ in 0..num_tries {
-        let now = ::std::time::Instant::now();
-        out = aoc_solution(INPUT.trim_end());
-        let elapsed = now.elapsed();
-        tot += elapsed.as_micros() as f32;
-        }
-        tot = tot / num_tries as f32;
-        if !args.perf {
-            println!("\nPart one: {}", out.0);
-            println!("Part two: {}", out.1);
-            println!("Time: {}μs", tot as usize);
-        }
-        else {
-            println!("Time: {}μs", tot as usize);
-        }
-        //if elapsed.as_millis() > 0 {
-        //  println!("Time: {}ms", elapsed.as_millis());
-        //} else {
-        //}
-    }
     };
     TokenStream::from(tokens)
 }
