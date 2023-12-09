@@ -1,12 +1,49 @@
-use std::{cmp::{Ordering, self}, collections::HashMap};
 
 use itertools::Itertools;
+const TEST : &str = "32T3K 765
+T55J5 684
+KK677 28
+KTJJT 220
+QQQJA 483";
+
+fn score_card(part: i32, card: &[u8]) -> Vec<u8> {
+    
+    let mut face_counts = vec![0 as u8; 13 + 5];
+    let mut secondary_sort = vec![0 as u8; 5];
+    let remap_1 = b"23456789TJQKA";
+    let remap_2 = b"J23456789TQKA";
+    for index in 0..5 {
+        // Count up the card values into the data
+        let mut pos = 0;
+        let card_char = card[index as usize];
+        if part == 0 {
+            pos = remap_1.iter().position(|c| *c == card_char).unwrap();
+            face_counts[pos] += 1;
+        } else {
+            pos = remap_2.iter().position(|c| *c == card_char).unwrap();
+            if card_char != b'J' {
+                face_counts[pos] += 1;
+            }
+        }
+        secondary_sort[index] = pos as u8;
+    }
+    // Sort them to figure out who wins
+    face_counts.sort_by(|a, b| b.cmp(a));
+
+    // make a secondary ordering to resolve matches
+    for index in 0..5 {
+        face_counts[index + 13] = secondary_sort[index];
+        if part == 1 && card[index as usize] == b'J' {
+            face_counts[0] += 1;
+        }
+    }
+    face_counts
+}
 
 #[aoc::main(7)]
-
 fn main(part: i32, input: &str) -> usize {
     //Q4QKK 465
-    let data = input
+    let mut data = input
         .lines()
         .flat_map(|l| {
             l.split(" ")
@@ -16,72 +53,16 @@ fn main(part: i32, input: &str) -> usize {
         })
         .collect::<Vec<_>>();
 
-    let values: HashMap<char, u64> = HashMap::from([
-        ('2', 2),
-        ('3', 3),
-        ('4', 4),
-        ('5', 5),
-        ('6', 6),
-        ('7', 7),
-        ('8', 8),
-        ('9', 9),
-        ('T', 10),
-        ('J', 11),
-        ('Q', 12),
-        ('K', 13),
-        ('A', 14),
-    ]);
 
-    if part == 0 {
-        let mut sorted_cards = Vec::new();
+    data.sort_by_key(|(card, _)| score_card(part, card.as_bytes()));
 
-        // For each row
-        for c in data {
-            let mut map = HashMap::new();
-
-            // For each character in the cards
-            c.0.chars().for_each(|c| {
-                let count = map.entry(c).or_insert(0 as u64);
-                *count += 1;
-            });
-
-            // Score all the card entries
-            let score = map.iter().fold(0, |acc, (_c, v)| {
-                acc + match v {
-                    1 => 0 as u64,
-                    2 => 1,
-                    3 => 10,
-                    4 => 100,
-                    5 => 1000,
-                    _ => 0,
-                }
-            });
-
-            sorted_cards.push((c.0, c.1, score));
-        }
-
-        sorted_cards.sort_by(|&left, &right| {
-            let or = left.2.cmp(&right.2);
-            if or == Ordering::Equal {
-                for (a, b) in left.0.chars().zip(right.0.chars()) {
-                    let a1 = values.get(&a).unwrap();
-                    let b1 = values.get(&b).unwrap();
-                    let order = a1.cmp(&b1);
-                    if order != Ordering::Equal {
-                        return order;
-                    }
-                }
-            }
-            or
-        });
-
-        sorted_cards.iter().enumerate().map(|(index, (_, r, _))| {
+    data
+        .iter()
+        .enumerate()
+        .map(|(index, (card, r))| {
             r * (index as u64 + 1)
-        }).sum::<u64>() as usize
-    } else {
-        0
-    }
+        })
+        .sum::<u64>() as usize
 
-    //251136060
-
+    //251136060, 251339174
 }

@@ -48,8 +48,11 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
                     if tot < 1000.0 {
                         println!("Time: {}ns", tot as usize);
                     }
-                    else {
+                    else if tot < 1000000.0 {
                         println!("Time: {}μs", (tot / 1000.0) as usize);
+                    }
+                    else {
+                        println!("Time: {}ms", (tot / 1000000.0) as usize);
                     }
                 }
                 else {
