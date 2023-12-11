@@ -1,7 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, AttributeArgs, Ident, ItemFn, Lit, NestedMeta};
-
 // CM: Note:  I got these macros from here:
 // https://github.com/AxlLind/AdventOfCode2022
 
@@ -17,12 +16,25 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let tokens = quote! {
         use clap::Parser;
+        use prettytable::{Cell, Row, Table};
         const INPUT: &str = include_str!(#input_path);
 
         #[derive(Parser)]
         struct Cli {
             #[arg(short, long, default_value_t = false)]
-            perf: bool
+            perf: bool,
+            #[arg(short, long, default_value_t = false)]
+            uber: bool
+        }
+
+        fn format_ns(val: u64) -> String {
+            if val < 1000 {
+                format!("{:.1}ns", val)
+            } else if val < 1000000 {
+                format!("{:.1}μs", val as f64 / 1000.0)
+            } else {
+                format!("{:.1}ms", val as f64 / 1000000.0)
+            }
         }
 
         #aoc_solution
@@ -35,6 +47,8 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
             if args.perf == true {
                 num_tries = 1000
             }
+
+            let mut res = Vec::new();
             for part in 0..=1 {
                 for _ in 0..num_tries {
                     let now = ::std::time::Instant::now();
@@ -43,29 +57,31 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
                     tot += elapsed.as_nanos() as f64;
                 }
                 tot = tot / num_tries as f64;
-                if !args.perf {
-                    println!("\nPart {}: {}", part + 1, out);
-                    if tot < 1000.0 {
-                        println!("Time: {:.1}ns", tot as usize);
-                    }
-                    else if tot < 1000000.0 {
-                        println!("Time: {:.1}μs", (tot / 1000.0));
-                    }
-                    else {
-                        println!("Time: {:.1}ms", (tot / 1000000.0));
-                    }
+                res.push((out, tot as u64));
+            }
+
+            if !args.uber {
+                let mut table = Table::new();
+                table.add_row(Row::new(vec![
+                    Cell::new("Part"),
+                    Cell::new("Result"),
+                    Cell::new("Time"),
+                ]));
+
+                for (index, (r, t)) in res.iter().enumerate() {
+                    table.add_row(Row::new(vec![
+                        Cell::new(&format!("{}", index)),
+                        Cell::new(&format!("{}", r)),
+                        Cell::new(&format!("{}", format_ns(*t)))
+                    ]));
                 }
-                else {
-                    if part > 0 {
-                        print!(",");
-                    }
-                    print!("{}", tot as usize);
+                table.printstd();
+            }
+            else {
+                for a in res { 
+                    print!("{},{},", a.0, a.1);
                 }
             }
-            //if elapsed.as_millis() > 0 {
-            //  println!("Time: {}ms", elapsed.as_millis());
-            //} else {
-            //}
         }
     };
     TokenStream::from(tokens)
