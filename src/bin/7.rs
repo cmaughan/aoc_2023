@@ -1,49 +1,72 @@
-
 use itertools::Itertools;
-const TEST : &str = "32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483";
 
-fn score_card(part: i32, card: &[u8]) -> Vec<u8> {
-    
-    let mut face_counts = vec![0 as u8; 13 + 5];
-    let mut secondary_sort = vec![0 as u8; 5];
-    let remap_1 = b"23456789TJQKA";
-    let remap_2 = b"J23456789TQKA";
-    for index in 0..5 {
-        // Count up the card values into the data
-        let mut pos = 0;
-        let card_char = card[index as usize];
-        if part == 0 {
-            pos = remap_1.iter().position(|c| *c == card_char).unwrap();
-            face_counts[pos] += 1;
+
+fn score_card(part: i32, card: &str) -> u64 {
+    let mut counts: [u8; 15] = [0; 15];
+    let mut score: u64 = 0;
+    for c in 0..15 {
+        counts[c] = 0;
+    }
+
+    let mut jokers: u8 = 0;
+    // For each character in the cards
+    card.chars().enumerate().for_each(|(index, c)| {
+        let count_index: u64;
+        if c.is_digit(10) {
+            count_index = c as u64 - b'0' as u64;
         } else {
-            pos = remap_2.iter().position(|c| *c == card_char).unwrap();
-            if card_char != b'J' {
-                face_counts[pos] += 1;
+            count_index = match c {
+                'T' => 10,
+                'J' => 11,
+                'Q' => 12,
+                'K' => 13,
+                'A' => 14,
+                _ => 0,
             }
         }
-        secondary_sort[index] = pos as u8;
-    }
-    // Sort them to figure out who wins
-    face_counts.sort_by(|a, b| b.cmp(a));
 
-    // make a secondary ordering to resolve matches
-    for index in 0..5 {
-        face_counts[index + 13] = secondary_sort[index];
-        if part == 1 && card[index as usize] == b'J' {
-            face_counts[0] += 1;
+        if c == 'J' {
+            jokers += 1;
+            if part == 0 {
+                counts[count_index as usize] += 1;
+                score |= count_index << (5 * (5 - index));
+            }
+        } else {
+            counts[count_index as usize] += 1;
+            score |= count_index << (5 * (5 - index));
         }
+    });
+
+    if part == 1 {
+        let index = counts
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.cmp(b))
+            .unwrap()
+            .0;
+        counts[index] += jokers;
     }
-    face_counts
+
+    // Score all the card entries
+    let face_score = counts.iter().fold(0, |acc, v| {
+        acc + match v {
+            1 => 0 as u64,
+            2 => 2,
+            3 => 8,
+            4 => 32,
+            5 => 64,
+            _ => 0,
+        }
+    });
+
+    score |= face_score << 32;
+    score
 }
 
 #[aoc::main(7)]
 fn main(part: i32, input: &str) -> usize {
-    //Q4QKK 465
-    let mut data = input
+
+    input
         .lines()
         .flat_map(|l| {
             l.split(" ")
@@ -51,17 +74,10 @@ fn main(part: i32, input: &str) -> usize {
                 .map(|(a, b)| (a, b.parse::<u64>().unwrap()))
                 .collect::<Vec<_>>()
         })
-        .collect::<Vec<_>>();
-
-
-    data.sort_by_key(|(card, _)| score_card(part, card.as_bytes()));
-
-    data
-        .iter()
+        .map(|(card, order)| (card, order, score_card(part, card)))
+        .sorted_by_key(|(_, _, score)| *score)
         .enumerate()
-        .map(|(index, (card, r))| {
-            r * (index as u64 + 1)
-        })
+        .map(|(index, (_, r, _))| r * (index as u64 + 1))
         .sum::<u64>() as usize
 
     //251136060, 251339174

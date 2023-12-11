@@ -4,10 +4,14 @@ use std::{error::Error, fs, process::Command};
 
 fn format_ns(val: u64) -> String {
     if val < 1000 {
-        format!("{}ns", val)
-    } else {
-        format!("{}μs", val / 1000)
+        format!("{:.1}ns", val)
+    } else if val < 1000000 {
+        format!("{:.1}μs", val as f64 / 1000.0)
     }
+    else {
+        format!("{:.1}ms", val as f64 / 1000000.0)
+    }
+
 }
 fn extract_microseconds(output: &str) -> (u64, u64, String) {
     let out = output
@@ -60,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     if clargs.perf {
-        println!("\nTotal time: {}μs", total_time as f64 / 1000.0);
+        println!("\nTotal time: {}", format_ns(total_time));
     }
     Ok(())
 }
