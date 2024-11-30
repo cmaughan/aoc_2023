@@ -1,4 +1,4 @@
-# Advent Of Code :christmas_tree: 2023
+# Advent Of Code :christmas_tree: 2024
 This year in Rust :crab:
 
 ## Usage
@@ -7,3 +7,4 @@ cargo run --release --bin DAY # run a specific day
 cargo run --release           # run all days
 ```
 
+# aoc_2024
