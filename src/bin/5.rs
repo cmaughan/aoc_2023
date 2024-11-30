@@ -33,6 +33,7 @@ fn main(part: i32, _input: &str) -> usize {
         .collect::<Vec<_>>();
 
     if part == 0 {
+        i
         // Part 0, just a mapped search
         categories[0].iter().fold(u64::MAX, |lowest, &seed| {
             min(lowest, resolve_seed(seed, &categories))

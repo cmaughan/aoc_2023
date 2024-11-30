@@ -76,8 +76,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     table.printstd();
-    if clargs.perf {
-        println!("\nTotal time: {}", format_ns(total_time));
-    }
+    println!("\nTotal time: {}", format_ns(total_time));
     Ok(())
 }

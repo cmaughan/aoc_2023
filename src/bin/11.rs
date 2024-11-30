@@ -4,9 +4,12 @@ use itertools::Itertools;
 fn main(part: i32, input: &str) -> usize {
     let mut data: Vec<Vec<u8>> = input.lines().map(|l| l.bytes().collect_vec()).collect::<Vec<_>>();
 
-    for x in 0..data[0].len() {
+    let x_len = data[0].len();
+    let y_len = data.len();
+
+    for x in 0..x_len {
         let mut found = false;
-        for y in 0..data.len() {
+        for y in 0..y_len {
             if data[y][x] == b'#' {
                 found = true;
                 break;
@@ -20,11 +23,11 @@ fn main(part: i32, input: &str) -> usize {
     let mut loc = Vec::new();
     let mut yy: i64 = 0;
 
-    for y in 0..data.len() {
+    for y in 0..y_len {
         let mut xx: i64 = 0;
 
         let mut empty_row = true;
-        for x in 0..data[0].len() {
+        for x in 0..x_len {
             if data[y][x] == b'#' {
                 loc.push((yy, xx));
                 empty_row = false;
@@ -54,8 +57,8 @@ fn main(part: i32, input: &str) -> usize {
 
     let mut total: i64 = 0;
     for (index_1, loc_1) in loc.iter().enumerate() {
-        for (x, y) in loc.iter().skip(index_1 + 1) {
-            let dist = ((loc_1.0 - x) as i64).abs() + ((loc_1.1 - y) as i64).abs();
+        for (y, x) in loc.iter().skip(index_1 + 1) {
+            let dist = ((y - loc_1.0) as i64) + ((loc_1.1 - x).abs() as i64);
             total += dist;
         }
     }
